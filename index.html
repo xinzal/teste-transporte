@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Envio de Nota Fiscal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f6f8;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 12px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 25px;
+      font-size: 16px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h3>Envio de Nota Fiscal (XML + PDF)</h3>
+
+  <label for="solicitante">Solicitante:</label>
+  <select id="solicitante" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option value="Luiz">Luiz</option>
+    <option value="Juliana">Juliana</option>
+    <option value="Rafael">Rafael</option>
+    <option value="Vitor">Vitor</option>
+    <option value="Eduardo">Eduardo</option>
+    <option value="Joyce">Joyce</option>
+    <option value="Rodrigo">Rodrigo</option>
+    <option value="Patricia">Patricia</option>
+    <option value="Elizabeth">Elizabeth</option>
+    <option value="Ana">Ana</option>
+    <option value="Maria Julia">Maria Julia</option>
+    <option value="Lucas">Lucas</option>
+    <option value="Roberto">Roberto</option>
+    <option value="Ester">Ester</option>
+    <option value="João">João</option>
+  </select>
+
+  <label for="empresa">Empresa Canal:</label>
+  <select id="empresa" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option value="202-B2B">202-B2B</option>
+    <option value="202-B2C">202-B2C</option>
+    <option value="106-B2B">106-B2B</option>
+    <option value="106-B2C">106-B2C</option>
+    <option value="203-B2C">203-B2C</option>
+    <option value="104-B2C">104-B2C</option>
+    <option value="103-B2B">103-B2B</option>
+    <option value="502-B2C">502-B2C</option>
+    <option value="503-B2B">503-B2B</option>
+    <option value="501-ESCR">501-ESCR</option>
+    <option value="301-FUTURE">301-FUTURE</option>
+    <option value="101-LOGISTOCK">101-LOGISTOCK</option>
+    <option value="201-LOGISTOCK">201-LOGISTOCK</option>
+  </select>
+
+  <label for="oc">OC:</label>
+  <input type="number" id="oc" min="1" required>
+
+  <label for="tipoProduto">Tipo de Produto:</label>
+  <select id="tipoProduto" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option value="MP">MP</option>
+    <option value="PA">PA</option>
+    <option value="EMBALAGEM">EMBALAGEM</option>
+    <option value="TRADE">TRADE</option>
+    <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+  </select>
+
+  <label for="nfFabrica">NF Fábrica:</label>
+  <input type="text" id="nfFabrica">
+
+  <label for="pdfFabricaFile">PDF da NF Fábrica:</label>
+  <input type="file" id="pdfFabricaFile" accept=".pdf">
+
+  <label for="classeLetsCargo">Classe Lets Cargo:</label>
+  <select id="classeLetsCargo" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option value="N/A">N/A</option>
+    <option value="LC - Cross">LC - Cross</option>
+    <option value="LC - Armz">LC - Armz</option>
+    <option value="LC - Pedido">LC - Pedido</option>
+  </select>
+
+  <label for="xmlFile">Arquivo XML Remessa:</label>
+  <input type="file" id="xmlFile" accept=".xml" required>
+
+  <label for="pdfFile">Arquivo PDF Remessa:</label>
+  <input type="file" id="pdfFile" accept=".pdf" required>
+
+  <button onclick="enviarArquivos()" id="botaoEnviar">Enviar</button>
+
+  <div id="status"></div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOkJt5XPCYP6IiIbYBkxa4eJqwltXi5gMvU97m_gV6ILrSEH5qi6CCosbz8WbT0sdA/exec";
+
+    async function enviarArquivos() {
+      const xmlFile = document.getElementById('xmlFile').files[0];
+      const pdfFile = document.getElementById('pdfFile').files[0];
+      const pdfFabricaFile = document.getElementById('pdfFabricaFile').files[0];
+      const solicitante = document.getElementById('solicitante').value.trim();
+      const empresa = document.getElementById('empresa').value;
+      const oc = document.getElementById('oc').value.trim();
+      const tipoProduto = document.getElementById('tipoProduto').value;
+      const nfFabrica = document.getElementById('nfFabrica').value.trim();
+      const classeLetsCargo = document.getElementById('classeLetsCargo').value;
+
+      const status = document.getElementById('status');
+      const btn = document.getElementById('botaoEnviar');
+
+      status.textContent = "";
+      status.style.color = "black";
+
+      if (!xmlFile || !pdfFile || !solicitante || !empresa || !oc || !tipoProduto || !classeLetsCargo) {
+        status.textContent = "Por favor, preencha todos os campos obrigatórios.";
+        status.style.color = "red";
+        return;
+      }
+
+      if (isNaN(oc) || Number(oc) <= 0) {
+        status.textContent = "OC deve ser um número maior que zero.";
+        status.style.color = "red";
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = "Enviando arquivos...";
+
+      // Função para converter arquivo em Base64
+      const fileToBase64 = file => new Promise((resolve, reject) => {
+        if (!file) resolve(null);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+
+      try {
+        const xmlBase64 = await fileToBase64(xmlFile);
+        const pdfBase64 = await fileToBase64(pdfFile);
+        const pdfFabricaBase64 = await fileToBase64(pdfFabricaFile);
+
+        const formData = new FormData();
+        formData.append("xmlBase64", xmlBase64);
+        formData.append("xmlName", xmlFile.name);
+        formData.append("pdfBase64", pdfBase64);
+        formData.append("pdfName", pdfFile.name);
+        formData.append("solicitante", solicitante);
+        formData.append("empresa", empresa);
+        formData.append("oc", oc);
+        formData.append("tipoProduto", tipoProduto);
+        formData.append("nfFabrica", nfFabrica);
+        formData.append("pdfFabricaBase64", pdfFabricaBase64);
+        formData.append("pdfFabricaName", pdfFabricaFile ? pdfFabricaFile.name : "");
+        formData.append("classeLetsCargo", classeLetsCargo);
+
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.text(); // Apps Script retorna texto
+        status.textContent = "Arquivos enviados com sucesso!";
+        status.style.color = "green";
+        btn.disabled = false;
+
+        // Resetar formulário
+        document.querySelectorAll('select, input').forEach(el => el.value = "");
+      } catch (err) {
+        status.textContent = "Erro: " + err.message;
+        status.style.color = "red";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
